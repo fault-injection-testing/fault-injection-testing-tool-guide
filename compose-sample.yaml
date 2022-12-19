@@ -1,0 +1,51 @@
+services:
+  grafana:
+    image: grafana/grafana:9.1.8
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: 'true'
+
+  loki:
+    image: grafana/loki:2.6.1
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki-storage:/loki
+
+  influxdb:
+    image: influxdb:2.4.0
+    ports:
+      - 8086:8086
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=user
+      - DOCKER_INFLUXDB_INIT_PASSWORD=password
+      - DOCKER_INFLUXDB_INIT_ORG=org
+      - DOCKER_INFLUXDB_INIT_BUCKET=jmeter
+      - DOCKER_INFLUXDB_INIT_RETENTION=1w
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-super-secret-auth-token
+    volumes:
+      - influxdb2-storage:/var/lib/influxdb2
+      - ./influxdb2/conf:/etc/influxdb2
+
+  prometheus:
+    image: prom/prometheus:v2.39.1
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/conf:/etc/prometheus
+      - prometheus-storage:/prometheus
+
+volumes:
+  grafana-storage:
+    external: false
+  loki-storage:
+    external: false
+  influxdb2-storage:
+    external: false
+  prometheus-storage:
+    external: false

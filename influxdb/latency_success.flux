@@ -1,0 +1,6 @@
+from(bucket: "jmeter")
+|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+|> filter(fn: (r) => r._measurement == "jmeter" and r._field == "ttfb")
+|> filter(fn: (r) => r.status == "ok")
+|> aggregateWindow(every: ${aggregation}s, fn: (tables=<-, column) => tables |> quantile(q:0.99, method: "exact_selector"))
+|> map(fn: (r) => ({r with _field: "99 percentile"}))

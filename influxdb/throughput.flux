@@ -1,0 +1,7 @@
+from(bucket: "jmeter")
+|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+|> filter(fn: (r) => r._measurement == "jmeter" and r._field == "ttfb")
+|> aggregateWindow(every: ${aggregation}s, fn: count, createEmpty: false)
+|> toFloat()
+|> map(fn: (r) => ({ r with _value: float(v: r._value / float(v: ${aggregation}))}))
+|> map(fn: (r) => ({r with _field: "Throughput"}))
